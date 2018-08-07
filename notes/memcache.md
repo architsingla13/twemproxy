@@ -1,162 +1,195 @@
-## Memcache Command Support
+# Memcache Command Support
 
-### Request
+## Request
 
-- Twemproxy implements only the memached ASCII commands
-- Binary commands are currently unsupported
+* Twemproxy implements only the memached ASCII commands
+* Binary commands are currently unsupported
 
-#### Ascii Storage Command
+### Ascii Storage Command
 
-    +-------------------+------------+--------------------------------------------------------------------------+
-    |      Command      | Supported? | Format                                                                   |
-    +-------------------+------------+--------------------------------------------------------------------------+
-    |        set        |    Yes     | set <key> <flags> <expiry> <datalen> [noreply]\r\n<data>\r\n             |
-    +-------------------+------------+--------------------------------------------------------------------------+
-    |        add        |    Yes     | add <key> <flags> <expiry> <datalen> [noreply]\r\n<data>\r\n             |
-    +-------------------+------------+--------------------------------------------------------------------------+
-    |      replace      |    Yes     | replace <key> <flags> <expiry> <datalen> [noreply]\r\n<data>\r\n         |
-    +-------------------+------------+--------------------------------------------------------------------------+
-    |      append       |    Yes     | append <key> <flags> <expiry> <datalen> [noreply]\r\n<data>\r\n          |
-    +-------------------+------------+--------------------------------------------------------------------------+
-    |      prepend      |    Yes     | prepend <key> <flags> <expiry> <datalen> [noreply]\r\n<data>\r\n         |
-    +-------------------+------------+--------------------------------------------------------------------------+
-    |       cas         |    Yes     | cas <key> <flags> <expiry> <datalen> <cas> [noreply]\r\n<data>\r\n       |
-    +-------------------+------------+--------------------------------------------------------------------------+
-
-* Where,
-  * <flags>   - uint32_t : data specific client side flags
-  * <expiry>  - uint32_t : expiration time (in seconds)
-  * <datalen> - uint32_t : size of the data (in bytes)
-  * <data>    - uint8_t[]: data block
-  * <cas>     - uint64_t
-
-#### Ascii Retrival Command
-
-    +-------------------+------------+--------------------------------------------------------------------------+
-    |      Command      | Supported? | Format                                                                   |
-    +-------------------+------------+--------------------------------------------------------------------------+
-    |        get        |    Yes     | get <key> [<key>]+\r\n                                                   |
-    +-------------------+------------+--------------------------------------------------------------------------+
-    |        gets       |    Yes     | gets <key> [<key>]+\r\n                                                  |
-    +-------------------+------------+--------------------------------------------------------------------------+
-
-#### Ascii Delete
-
-    +-------------------+------------+--------------------------------------------------------------------------+
-    |      Command      | Supported? | Format                                                                   |
-    +-------------------+------------+--------------------------------------------------------------------------+
-    |        delete     |    Yes     | delete <key> [noreply]\r\n                                               |
-    +-------------------+------------+--------------------------------------------------------------------------+
-
-#### Ascii Arithmetic Command
-
-    +-------------------+------------+--------------------------------------------------------------------------+
-    |      Command      | Supported? | Format                                                                   |
-    +-------------------+------------+--------------------------------------------------------------------------+
-    |        incr       |    Yes     | incr <key> <value> [noreply]\r\n                                         |
-    +-------------------+------------+--------------------------------------------------------------------------+
-    |        decr       |    Yes     | decr <key> <value> [noreply]\r\n                                         |
-    +-------------------+------------+--------------------------------------------------------------------------+
+```text
++-------------------+------------+--------------------------------------------------------------------------+
+|      Command      | Supported? | Format                                                                   |
++-------------------+------------+--------------------------------------------------------------------------+
+|        set        |    Yes     | set <key> <flags> <expiry> <datalen> [noreply]\r\n<data>\r\n             |
++-------------------+------------+--------------------------------------------------------------------------+
+|        add        |    Yes     | add <key> <flags> <expiry> <datalen> [noreply]\r\n<data>\r\n             |
++-------------------+------------+--------------------------------------------------------------------------+
+|      replace      |    Yes     | replace <key> <flags> <expiry> <datalen> [noreply]\r\n<data>\r\n         |
++-------------------+------------+--------------------------------------------------------------------------+
+|      append       |    Yes     | append <key> <flags> <expiry> <datalen> [noreply]\r\n<data>\r\n          |
++-------------------+------------+--------------------------------------------------------------------------+
+|      prepend      |    Yes     | prepend <key> <flags> <expiry> <datalen> [noreply]\r\n<data>\r\n         |
++-------------------+------------+--------------------------------------------------------------------------+
+|       cas         |    Yes     | cas <key> <flags> <expiry> <datalen> <cas> [noreply]\r\n<data>\r\n       |
++-------------------+------------+--------------------------------------------------------------------------+
+```
 
 * Where,
-  * <value> - uint64_t
+  *    - uint32\_t : data specific client side flags
+  *   - uint32\_t : expiration time \(in seconds\)
+  *  - uint32\_t : size of the data \(in bytes\)
+  *     - uint8\_t\[\]: data block
+  *      - uint64\_t
 
-#### Ascii Misc Command
+### Ascii Retrival Command
 
-    +-------------------+------------+--------------------------------------------------------------------------+
-    |      Command      | Supported? | Format                                                                   |
-    +-------------------+------------+--------------------------------------------------------------------------+
-    |       touch       |    Yes     | touch <key> <expiry>[noreply]\r\n                                        |
-    +-------------------+------------+--------------------------------------------------------------------------+
-    |        quit       |    Yes     | quit\r\n                                                                 |
-    +-------------------+------------+--------------------------------------------------------------------------+
-    |      flush_all    |    No      | flush_all [<delay>] [noreply]\r\n                                        |
-    +-------------------+------------+--------------------------------------------------------------------------+
-    |      version      |    No      | version\r\n                                                              |
-    +-------------------+------------+--------------------------------------------------------------------------+
-    |      verbosity    |    No      | verbosity <num> [noreply]\r\n                                            |
-    +-------------------+------------+--------------------------------------------------------------------------+
-    |       stats       |    No      | stats\r\n                                                                |
-    +-------------------+------------+--------------------------------------------------------------------------+
-    |       stats       |    No      | stats <args>\r\n                                                         |
-    +-------------------+------------+--------------------------------------------------------------------------+
+```text
++-------------------+------------+--------------------------------------------------------------------------+
+|      Command      | Supported? | Format                                                                   |
++-------------------+------------+--------------------------------------------------------------------------+
+|        get        |    Yes     | get <key> [<key>]+\r\n                                                   |
++-------------------+------------+--------------------------------------------------------------------------+
+|        gets       |    Yes     | gets <key> [<key>]+\r\n                                                  |
++-------------------+------------+--------------------------------------------------------------------------+
+```
 
-### Response
+### Ascii Delete
 
-#### Error Responses
+```text
++-------------------+------------+--------------------------------------------------------------------------+
+|      Command      | Supported? | Format                                                                   |
++-------------------+------------+--------------------------------------------------------------------------+
+|        delete     |    Yes     | delete <key> [noreply]\r\n                                               |
++-------------------+------------+--------------------------------------------------------------------------+
+```
 
-    ERROR\r\n
-    CLIENT_ERROR [error]\r\n
-    SERVER_ERROR [error]\r\n
+### Ascii Arithmetic Command
 
-    Where,
-    - ERROR means client sent a non-existent command name
-    - CLIENT_ERROR means that command sent by the client does not conform to the protocol
-    - SERVER_ERROR means that there was an error on the server side that made processing of the command impossible
+```text
++-------------------+------------+--------------------------------------------------------------------------+
+|      Command      | Supported? | Format                                                                   |
++-------------------+------------+--------------------------------------------------------------------------+
+|        incr       |    Yes     | incr <key> <value> [noreply]\r\n                                         |
++-------------------+------------+--------------------------------------------------------------------------+
+|        decr       |    Yes     | decr <key> <value> [noreply]\r\n                                         |
++-------------------+------------+--------------------------------------------------------------------------+
+```
 
-#### Storage Command Responses
+* Where,
+  *  - uint64\_t
 
-    STORED\r\n
-    NOT_STORED\r\n
-    EXISTS\r\n
-    NOT_FOUND\r\n
+### Ascii Misc Command
 
-    Where,
-    - STORED indicates success.
-    - NOT_STORED indicates the data was not stored because condition for an add or replace wasn't met.
-    - EXISTS indicates that the item you are trying to store with a cas has been modified since you last fetched it.
-    - NOT_FOUND indicates that the item you are trying to store with a cas does not exist.
+```text
++-------------------+------------+--------------------------------------------------------------------------+
+|      Command      | Supported? | Format                                                                   |
++-------------------+------------+--------------------------------------------------------------------------+
+|       touch       |    Yes     | touch <key> <expiry>[noreply]\r\n                                        |
++-------------------+------------+--------------------------------------------------------------------------+
+|        quit       |    Yes     | quit\r\n                                                                 |
++-------------------+------------+--------------------------------------------------------------------------+
+|      flush_all    |    No      | flush_all [<delay>] [noreply]\r\n                                        |
++-------------------+------------+--------------------------------------------------------------------------+
+|      version      |    No      | version\r\n                                                              |
++-------------------+------------+--------------------------------------------------------------------------+
+|      verbosity    |    No      | verbosity <num> [noreply]\r\n                                            |
++-------------------+------------+--------------------------------------------------------------------------+
+|       stats       |    No      | stats\r\n                                                                |
++-------------------+------------+--------------------------------------------------------------------------+
+|       stats       |    No      | stats <args>\r\n                                                         |
++-------------------+------------+--------------------------------------------------------------------------+
+```
 
-#### Delete Command Responses
+## Response
 
-    NOT_FOUND\r\n
-    DELETED\r\n
+### Error Responses
 
-#### Retrival Responses
+```text
+ERROR\r\n
+CLIENT_ERROR [error]\r\n
+SERVER_ERROR [error]\r\n
 
-    END\r\n
-    VALUE <key> <flags> <datalen> [<cas>]\r\n<data>\r\nEND\r\n
-    VALUE <key> <flags> <datalen> [<cas>]\r\n<data>\r\n[VALUE <key> <flags> <datalen> [<cas>]\r\n<data>]+\r\nEND\r\n
+Where,
+- ERROR means client sent a non-existent command name
+- CLIENT_ERROR means that command sent by the client does not conform to the protocol
+- SERVER_ERROR means that there was an error on the server side that made processing of the command impossible
+```
 
-#### Arithmetic Responses
+### Storage Command Responses
 
-    NOT_FOUND\r\n
-    <value>\r\n
+```text
+STORED\r\n
+NOT_STORED\r\n
+EXISTS\r\n
+NOT_FOUND\r\n
 
-    Where,
-    - <value> - uint64_t : new key value after incr or decr operation
+Where,
+- STORED indicates success.
+- NOT_STORED indicates the data was not stored because condition for an add or replace wasn't met.
+- EXISTS indicates that the item you are trying to store with a cas has been modified since you last fetched it.
+- NOT_FOUND indicates that the item you are trying to store with a cas does not exist.
+```
 
-#### Touch Command Responses
+### Delete Command Responses
 
-    NOT_FOUND\r\n
-    TOUCHED\r\n
+```text
+NOT_FOUND\r\n
+DELETED\r\n
+```
 
-#### Statistics Response
+### Retrival Responses
 
-    [STAT <name> <value>\r\n]+END\r\n
+```text
+END\r\n
+VALUE <key> <flags> <datalen> [<cas>]\r\n<data>\r\nEND\r\n
+VALUE <key> <flags> <datalen> [<cas>]\r\n<data>\r\n[VALUE <key> <flags> <datalen> [<cas>]\r\n<data>]+\r\nEND\r\n
+```
 
-#### Misc Responses
+### Arithmetic Responses
 
-    OK\r\n
-    VERSION <version>\r\n
+```text
+NOT_FOUND\r\n
+<value>\r\n
 
-### Notes
+Where,
+- <value> - uint64_t : new key value after incr or decr operation
+```
 
-- set always creates mapping irrespective of whether it is present on not.
-- add, adds only if the mapping is not present
-- replace, only replaces if the mapping is present
-- append and prepend command ignore flags and expiry values
-- noreply instructs the server to not send the reply even if there is an error.
-- decr of 0 is 0, while incr of UINT64_MAX is 0
-- maximum length of the key is 250 characters
-- expiry of 0 means that item never expires, though it could be evicted from the cache
-- non-zero expiry is either unix time (# seconds since 01/01/1970) or,
-  offset in seconds from the current time (< 60 x 60 x 24 x 30 seconds = 30 days)
-- expiry time is with respect to the server (not client)
-- <datalen> can be zero and when it is, the <data> block is empty.
-- Thoughts:
-  - ascii protocol is easier to debug - think using strace or tcpdump to see
+### Touch Command Responses
+
+```text
+NOT_FOUND\r\n
+TOUCHED\r\n
+```
+
+### Statistics Response
+
+```text
+[STAT <name> <value>\r\n]+END\r\n
+```
+
+### Misc Responses
+
+```text
+OK\r\n
+VERSION <version>\r\n
+```
+
+## Notes
+
+* set always creates mapping irrespective of whether it is present on not.
+* add, adds only if the mapping is not present
+* replace, only replaces if the mapping is present
+* append and prepend command ignore flags and expiry values
+* noreply instructs the server to not send the reply even if there is an error.
+* decr of 0 is 0, while incr of UINT64\_MAX is 0
+* maximum length of the key is 250 characters
+* expiry of 0 means that item never expires, though it could be evicted from the cache
+* non-zero expiry is either unix time \(\# seconds since 01/01/1970\) or,
+
+  offset in seconds from the current time \(&lt; 60 x 60 x 24 x 30 seconds = 30 days\)
+
+* expiry time is with respect to the server \(not client\)
+*  can be zero and when it is, the  block is empty.
+* Thoughts:
+  * ascii protocol is easier to debug - think using strace or tcpdump to see
+
     protocol on the wire, Or using telnet or netcat or socat to build memcache
+
     requests and responses
-    http://stackoverflow.com/questions/2525188/are-binary-protocols-dead
-  - http://news.ycombinator.com/item?id=1712788
+
+    [http://stackoverflow.com/questions/2525188/are-binary-protocols-dead](http://stackoverflow.com/questions/2525188/are-binary-protocols-dead)
+
+  * [http://news.ycombinator.com/item?id=1712788](http://news.ycombinator.com/item?id=1712788)
+
